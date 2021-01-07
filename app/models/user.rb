@@ -1,6 +1,8 @@
 class User < ActiveRecord::Base
     attr_accessor :remember_token, :activation_token, :reset_token
 
+    has_many :microposts, dependent: :destroy
+
     before_save   :downcase_email
     before_create :create_activation_digest
 
@@ -12,6 +14,10 @@ class User < ActiveRecord::Base
                       format: { with: VALID_EMAIL_REGEX },
                       uniqueness: { case_sensitive: false }
     validates :password, presence: true, length: { minimum: 8, maximum: 32 }, allow_nil: true
+
+    def feed
+        Micropost.where("user_id = ?", id)
+    end
 
     def remember
         self.remember_token = User.new_token
